@@ -1,7 +1,7 @@
 ---
 title: "CTA-ED Exercise 4: Scaling techniques (with correct answers)"
-author: "Marion Lieutaud"
-date: "6/03/2024"
+author: "Ziyi Wei"
+date: "2/03/2024"
 output: html_document
 ---
 
@@ -84,6 +84,10 @@ dfm_tweets
 
 Once we have our data in this format, we are able to group and trim the document feature matrix before estimating the wordfish model.
 
+(dfm_newstweets_results <- textmodel_wordfish(dfm_newstweets, 
+                                             sparse = TRUE)"
+Error in textmodel_wordfish(dfm_newstweets, sparse = TRUE) : 
+  unused argument (sparse = TRUE))
 ```{r}
 # compress the document-feature matrix at the newspaper level
 dfm_newstweets <- dfm_group(dfm_tweets, groups = newspaper)
@@ -97,8 +101,7 @@ dim(dfm_newstweets)
 
 #### estimate the Wordfish model ####
 set.seed(123L)
-dfm_newstweets_results <- textmodel_wordfish(dfm_newstweets, 
-                                             sparse = TRUE)
+dfm_newstweets_results <- textmodel_wordfish(dfm_newstweets)
 
 ```
 
@@ -176,16 +179,45 @@ dim(kaneko_dfm_study1)
 
 ```{r}
 ## estimate the Wordfish model
+set.seed(123L)
+kaneko_dfm_study1_results <- textmodel_wordfish(kaneko_dfm_study1)
+summary(kaneko_dfm_study1_results)
+```
+Write a paragraph here explaining and interpreting your results
+
+Chunichi (-1.22) is the most left-leaning newspaper, while Yomiuri (1.60) is the most right-leaning newspaper. Most newspapers are left leaning.
+
+```{r}
+# the word-level betas
+textplot_scale1d(kaneko_dfm_study1_results, margin = "features")
+```
+
+```{r}
+# the word-level betas for the top 20 words
+features_k <- kaneko_dfm_study1_results[["features"]]
+
+betas_k <- kaneko_dfm_study1_results[["beta"]]
+
+feat_betas_k <- as.data.frame(cbind(features_k, betas_k))
+feat_betas_k$betas_k <- as.numeric(feat_betas_k$betas_k)
+
+feat_betas_k %>%
+  arrange(desc(betas_k)) %>%
+  top_n(20) %>% 
+  kbl() %>%
+  kable_styling(bootstrap_options = "striped")
 
 ```
-Write a paragraph here explaining and interpreting your results 
 
 2. Visualize the results
-```{r, fig.cap="Wordfish model estimates of Japanese newspapers' editorial texts}
+```{r, fig.cap="Wordfish model estimates of Japanese newspapers' editorial texts"}
 ## We can then plot our estimates of the thetas---i.e., the estimates of the latent Japanese newspaper position.
+textplot_scale1d(kaneko_dfm_study1_results)
 ```
 
 Write here the interpretation of your plot(s)
+
+Yomiuri, Nikkei and Sankei are right-leaning newspapers, while Chunichi and Asahi are extremely left-leaning newspapers. Others are center-left newspapers.
 
 Don't forget to knit!
 
